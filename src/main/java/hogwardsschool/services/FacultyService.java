@@ -1,10 +1,6 @@
 package hogwardsschool.services;
 
-import hogwardsschool.exceptions.FacultyAlreadyExistException;
-import hogwardsschool.exceptions.NoFacultyExistException;
-import hogwardsschool.exceptions.NoStudentExistException;
 import hogwardsschool.model.Faculty;
-import hogwardsschool.model.Student;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -14,52 +10,36 @@ public class FacultyService {
     private final Map<Long, Faculty> facultyMap = new HashMap<>();
     Long id = 0L;
 
-    public Faculty addFaculty(Faculty temp) {
-        temp.setId(++id);
-        for (Faculty actual : facultyMap.values()) {
-            if (actual.getName().equals(temp.getName()) &&
-                    actual.getColor().equals(temp.getColor())) {
-                throw new FacultyAlreadyExistException("e");
-            }
+    public Faculty addFaculty(Faculty faculty) {
+        faculty.setId(++id);
+        facultyMap.put(faculty.getId(), faculty);
+        return faculty;
+    }
+
+    public Faculty findFaculty(Long facultyId) {
+        return facultyMap.get(facultyId);
+    }
+
+    public Faculty editFaculty(Long facultyId, Faculty faculty) {
+        faculty.setId(facultyId);
+        if (!facultyMap.containsKey(facultyId)) {
+            return null;
         }
-        facultyMap.put(id, temp);
-        return temp;
+        facultyMap.put(facultyId, faculty);
+        return faculty;
     }
 
-    public void deleteFaculty(Long id) {
-        if (!facultyMap.containsKey(id)) {
-            throw new NoFacultyExistException("e");
-        }
-        facultyMap.remove(id);
+    public void deleteFaculty(Long facultyId) {
+        facultyMap.remove(facultyId);
     }
 
-    public Faculty findFaculty(Long id) {
-        return facultyMap.get(id);
-    }
-
-    public Faculty editFaculty(Faculty temp) {
-        Set<Long> keys = facultyMap.keySet();
-        for (Long key : keys) {
-            if (temp.equalName(facultyMap.get(key))) {
-                temp.setId(key);
-                facultyMap.replace(key, temp);
-                break;
-            } else { throw new NoFacultyExistException("e"); }
-        }
-        return temp;
-    }
-
-    public Collection<Faculty> allFaculty() {
-        return Collections.unmodifiableCollection(facultyMap.values());
-    }
-
-    public Collection<Faculty> facultyByColor(String color) {
-        Collection<Faculty> result = new HashSet<>();
+    public Collection<Faculty> facultiesByColor(String color) {
+        Collection<Faculty> res = new HashSet<>();
         for (Faculty actual : facultyMap.values()) {
             if (color.equals(actual.getColor())) {
-                result.add(actual);
+                res.add(actual);
             }
         }
-        return Collections.unmodifiableCollection(result);
+        return Collections.unmodifiableCollection(res);
     }
 }
